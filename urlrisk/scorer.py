@@ -1,4 +1,5 @@
 from .checks.brand import check_brand_misuse
+from .checks.hosting import check_free_hosting, check_random_subdomain, check_shortener
 from .checks.lexical import (
     check_hyphens, check_ip_host, check_keywords, check_length,
     check_no_https, check_punycode, check_subdomain_depth, check_tld,
@@ -11,7 +12,8 @@ from .parsing import parse_url
 CHECKS = [
     check_ip_host, check_userinfo, check_subdomain_depth, check_length,
     check_punycode, check_hyphens, check_tld, check_no_https, check_keywords,
-    check_brand_misuse, check_typosquat,
+    check_brand_misuse, check_typosquat, check_free_hosting, check_shortener,
+    check_random_subdomain,
 ]
 
 BRAND_CHECKS = {"brand_misuse", "brand_lookalike", "typosquat"}
@@ -20,7 +22,7 @@ BRAND_CHECKS = {"brand_misuse", "brand_lookalike", "typosquat"}
 def level_for(score: int) -> str:
     if score >= 60:
         return "HIGH"
-    if score >= 30:
+    if score >= 20:
         return "MEDIUM"
     return "LOW"
 

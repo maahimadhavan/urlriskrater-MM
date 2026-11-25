@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 from ..models import Finding, ParsedURL
@@ -21,6 +22,10 @@ TOP = _load()
 TOP_SET = set(TOP)
 
 
+def _has_digit(s: str) -> bool:
+    return any(c.isdigit() for c in s)
+
+
 def check_typosquat(u: ParsedURL):
     reg = u.registered
     if reg in TOP_SET or len(u.domain) < 5:
@@ -32,6 +37,15 @@ def check_typosquat(u: ParsedURL):
     for top in TOP:
         if len(top) < 6 or abs(len(top) - len(cand)) > 2:
             continue
+
+        # Same brand on a different country domain (google.iq, zalando.at) is legitimate
+        if top.split(".")[0] == u.domain and len(u.suffix.split(".")[-1]) == 2:
+            continue
+
+        # Numbered hosts (awsdns-39 vs awsdns-09) differ only by their digits
+        if _has_digit(reg) and _has_digit(top) and re.sub(r"\d", "", reg) == re.sub(r"\d", "", top):
+            continue
+
         d = levenshtein(cand, top)
         if best is None or d < best[0]:
             best = (d, top)
